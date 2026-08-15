@@ -9,7 +9,11 @@
 (function () {
   "use strict";
 
-  const ID_PATTERN = /^SEC-ACADEMY-\d{4}-\d{6}$/;
+  /* Kept deliberately loose. It only decides whether to trouble the
+     server; the server is the authority. Accepting 4 to 8 digits means a
+     number issued under an earlier, differently padded series still
+     verifies. */
+  const ID_PATTERN = /^SEC-ACADEMY-\d{4}-\d{4,8}$/;
 
   const form = document.getElementById("verify-form");
   const input = document.getElementById("cert-id");
@@ -97,8 +101,8 @@
 
     note.innerHTML =
       '<p style="margin-bottom:0">Check the number against the printed certificate. It ' +
-      "reads SEC-ACADEMY, then a four-digit year, then a six-digit number — for example " +
-      "SEC-ACADEMY-2026-000001.</p>";
+      "reads SEC-ACADEMY, then a four-digit year, then the certificate " +
+      "number \u2014 for example SEC-ACADEMY-2026-483027.</p>";
   }
 
   function showUnavailable() {

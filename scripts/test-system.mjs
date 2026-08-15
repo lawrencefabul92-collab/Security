@@ -160,13 +160,13 @@ async function main() {
 
   const guarded = [
     ["Certificate list", "/api/certificates/list", "GET", null],
-    ["Certificate find", "/api/certificates/find?id=SEC-ACADEMY-2026-000001", "GET", null],
+    ["Certificate find", "/api/certificates/find?id=SEC-ACADEMY-2026-483027", "GET", null],
     ["Certificate create", "/api/certificates/create", "POST",
       { studentName: "Intruder", courseId: "security-management-fundamentals", completionDate: "2026-08-15" }],
     ["Certificate revoke", "/api/certificates/revoke", "POST",
-      { id: "SEC-ACADEMY-2026-000001", status: "REVOKED" }],
+      { id: "SEC-ACADEMY-2026-483027", status: "REVOKED" }],
     ["Certificate delete", "/api/certificates/delete", "POST",
-      { id: "SEC-ACADEMY-2026-000001" }],
+      { id: "SEC-ACADEMY-2026-483027" }],
     ["Inquiry list", "/api/inquiry", "GET", null],
     ["Session check", "/api/admin/session", "GET", null]
   ];
@@ -320,15 +320,15 @@ async function main() {
     JSON.stringify(res.data));
 
   const first = res.data.certificate || {};
-  check("Certificate number matches the required format",
-    /^SEC-ACADEMY-2026-000001$/.test(first.certificate_id || ""),
+  check("Certificate number carries the completion year and random digits",
+    /^SEC-ACADEMY-2026-\d{6}$/.test(first.certificate_id || ""),
     first.certificate_id);
   check("Course title comes from the catalogue, not the request",
     first.course_title === "Security Management Fundamentals", first.course_title);
   check("Student name is stored as typed", first.student_name === "Lawrence M. Fabul");
   check("Status is VALID", first.status === "VALID");
   check("Verification URL points at the verify page",
-    /\/verify\?id=SEC-ACADEMY-2026-000001$/.test(first.verification_url || ""),
+    (first.verification_url || "").endsWith("/verify?id=" + first.certificate_id),
     first.verification_url);
 
   /* A title supplied by the caller must be ignored entirely. */
@@ -348,7 +348,11 @@ async function main() {
   check("A caller-supplied course title is ignored",
     second.course_title === "Security Risk Management", second.course_title);
   check("A caller-supplied certificate number is ignored",
-    second.certificate_id === "SEC-ACADEMY-2026-000002", second.certificate_id);
+    second.certificate_id !== "SEC-ACADEMY-2026-999999" &&
+    /^SEC-ACADEMY-2026-\d{6}$/.test(second.certificate_id || ""),
+    second.certificate_id);
+  check("Certificate numbers are not sequential",
+    second.certificate_id !== "SEC-ACADEMY-2026-000002", second.certificate_id);
   check("A caller-supplied status is ignored", second.status === "VALID");
 
   /* Sequence integrity under concurrency. */
@@ -373,7 +377,37 @@ async function main() {
     new Set(batchIds).size === batchIds.length,
     batchIds.join(", "));
 
-  /* Different year, separate sequence. */
+  /* The guarantee that matters most with random numbering: issue a large
+     batch and prove every number is distinct and correctly formed. */
+  const bulk = [];
+  for (let i = 0; i < 60; i += 1) {
+    bulk.push(call("/api/certificates/create", {
+      method: "POST",
+      body: {
+        studentName: "Uniqueness Probe " + String.fromCharCode(65 + (i % 26)),
+        courseId: "security-management-fundamentals",
+        completionDate: "2026-08-15"
+      }
+    }));
+  }
+  const bulkIds = (await Promise.all(bulk))
+    .map((r) => r.data?.certificate?.certificate_id)
+    .filter(Boolean);
+  check("60 rapid certificates were all issued", bulkIds.length === 60,
+    bulkIds.length + " of 60");
+  check("all 60 numbers are unique", new Set(bulkIds).size === bulkIds.length,
+    bulkIds.length - new Set(bulkIds).size + " duplicates");
+  check("all 60 numbers are correctly formed",
+    bulkIds.every((id) => /^SEC-ACADEMY-2026-\d{6}$/.test(id)));
+  check("numbers are not consecutive",
+    new Set(bulkIds.map((id) => id.slice(-6))).size > 55);
+
+  /* Clean up so later counts stay exact. */
+  for (const id of bulkIds) {
+    await call("/api/certificates/delete", { method: "POST", body: { id } });
+  }
+
+  /* Different year, different prefix. */
   res = await call("/api/certificates/create", {
     method: "POST",
     body: {
@@ -382,9 +416,10 @@ async function main() {
       completionDate: "2025-11-20"
     }
   });
-  check("A 2025 completion starts the 2025 sequence",
-    res.data?.certificate?.certificate_id === "SEC-ACADEMY-2025-000001",
+  check("A 2025 completion is numbered under 2025",
+    /^SEC-ACADEMY-2025-\d{6}$/.test(res.data?.certificate?.certificate_id || ""),
     res.data?.certificate?.certificate_id);
+  const prevYearId = res.data?.certificate?.certificate_id;
 
   /* Punctuation that genuinely appears in Philippine names must pass.
      The record is removed afterwards so the counts below stay exact;
@@ -414,17 +449,17 @@ async function main() {
   check("Listing succeeds", res.status === 200 && Array.isArray(res.data.certificates));
   check("Listing reports the right total", res.data.total === 11, "total " + res.data.total);
   check("Newest certificate is first",
-    res.data.certificates[0]?.certificate_id === "SEC-ACADEMY-2025-000001",
+    res.data.certificates[0]?.certificate_id === prevYearId,
     res.data.certificates[0]?.certificate_id);
 
-  res = await call("/api/certificates/find?id=sec-academy-2026-000001");
+  res = await call("/api/certificates/find?id=" + first.certificate_id.toLowerCase());
   check("Lookup is case-insensitive", res.status === 200 &&
     res.data.certificate?.student_name === "Lawrence M. Fabul");
 
   res = await call("/api/certificates/find?id=NONSENSE");
   check("Lookup rejects a malformed number", res.status === 400);
 
-  res = await call("/api/certificates/find?id=SEC-ACADEMY-2026-987654");
+  res = await call("/api/certificates/find?id=SEC-ACADEMY-2026-111111");
   check("Lookup reports a missing number as not found", res.status === 404);
 
   /* =====================================================
@@ -432,7 +467,7 @@ async function main() {
      ===================================================== */
   section("7. Public verification (no session)");
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2026-000001", { withCookie: false });
+  res = await call("/api/verify?id=" + first.certificate_id, { withCookie: false });
   check("A valid certificate verifies", res.status === 200 &&
     res.data.found === true && res.data.status === "VALID");
   check("Verification shows the recipient", res.data.student_name === "Lawrence M. Fabul");
@@ -449,7 +484,7 @@ async function main() {
     check("Verification does not expose " + field, !exposed.includes(field));
   }
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2026-777777", { withCookie: false });
+  res = await call("/api/verify?id=SEC-ACADEMY-2026-222222", { withCookie: false });
   check("An unissued number reports NOT_FOUND",
     res.data.found === false && res.data.status === "NOT_FOUND");
 
@@ -460,7 +495,7 @@ async function main() {
   res = await call("/api/verify", { withCookie: false });
   check("A missing number reports NOT_FOUND", res.data.found === false);
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2026-000001", {
+  res = await call("/api/verify?id=" + first.certificate_id, {
     method: "POST", withCookie: false, body: { id: "x" }
   });
   check("Verification refuses POST (it is read-only)", res.status === 405);
@@ -471,35 +506,35 @@ async function main() {
   section("8. Revoke, restore and delete");
 
   res = await call("/api/certificates/revoke", {
-    method: "POST", body: { id: "SEC-ACADEMY-2026-000002", status: "REVOKED" }
+    method: "POST", body: { id: second.certificate_id, status: "REVOKED" }
   });
   check("Revoke succeeds", res.status === 200 && res.data.certificate.status === "REVOKED");
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2026-000002", { withCookie: false });
+  res = await call("/api/verify?id=" + second.certificate_id, { withCookie: false });
   check("A revoked certificate verifies as REVOKED",
     res.data.found === true && res.data.status === "REVOKED");
   check("A revoked certificate hides the recipient name",
     !Object.keys(res.data).includes("student_name"));
 
   res = await call("/api/certificates/revoke", {
-    method: "POST", body: { id: "SEC-ACADEMY-2026-000002", status: "VALID" }
+    method: "POST", body: { id: second.certificate_id, status: "VALID" }
   });
   check("Restore succeeds", res.status === 200 && res.data.certificate.status === "VALID");
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2026-000002", { withCookie: false });
+  res = await call("/api/verify?id=" + second.certificate_id, { withCookie: false });
   check("A restored certificate verifies as VALID again", res.data.status === "VALID");
 
   res = await call("/api/certificates/revoke", {
-    method: "POST", body: { id: "SEC-ACADEMY-2026-000002", status: "SOMETHING" }
+    method: "POST", body: { id: second.certificate_id, status: "SOMETHING" }
   });
   check("An invalid status is rejected", res.status === 400);
 
   res = await call("/api/certificates/delete", {
-    method: "POST", body: { id: "SEC-ACADEMY-2025-000001" }
+    method: "POST", body: { id: prevYearId }
   });
   check("Delete succeeds", res.status === 200 && res.data.ok === true);
 
-  res = await call("/api/verify?id=SEC-ACADEMY-2025-000001", { withCookie: false });
+  res = await call("/api/verify?id=" + prevYearId, { withCookie: false });
   check("A deleted certificate reports NOT_FOUND", res.data.found === false);
 
   res = await call("/api/certificates/create", {
@@ -510,8 +545,9 @@ async function main() {
       completionDate: "2025-12-01"
     }
   });
-  check("A deleted number is never reissued",
-    res.data?.certificate?.certificate_id === "SEC-ACADEMY-2025-000002",
+  check("A new 2025 certificate gets a fresh random number",
+    /^SEC-ACADEMY-2025-\d{6}$/.test(res.data?.certificate?.certificate_id || "") &&
+    res.data?.certificate?.certificate_id !== prevYearId,
     res.data?.certificate?.certificate_id);
 
   /* =====================================================

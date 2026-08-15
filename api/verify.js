@@ -26,7 +26,7 @@ import {
   rateLimit
 } from "../lib/http.js";
 
-const ID_PATTERN = /^SEC-ACADEMY-\d{4}-\d{6}$/;
+import { CERT_ID_PATTERN as ID_PATTERN } from "../lib/numbering.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "HEAD") {

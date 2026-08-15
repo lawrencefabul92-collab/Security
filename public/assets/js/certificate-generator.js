@@ -83,6 +83,10 @@
           (data.storage.warning || "certificates may not be stored permanently.");
       }
 
+      /* Shows which numbering scheme the SERVER is running, so a stale
+         deployment is obvious here rather than only after issuing a
+         certificate with the wrong kind of number. */
+      showNumbering();
       start();
     })
     .catch((error) => {
@@ -95,6 +99,28 @@
         "If you are previewing locally, start the site with <code>npm run dev</code> " +
         "so the API routes are available.";
     });
+
+  /* ---------- Which numbering scheme is live ---------- */
+  function showNumbering() {
+    fetch("/api/admin/setup-status")
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        var n = data && data.numbering;
+        var hint = document.getElementById("numbering-hint");
+        if (!hint) return;
+        if (!n) {
+          hint.textContent =
+            "This deployment is running an older version that does not report " +
+            "its numbering scheme.";
+          hint.className = "form-status is-err";
+          return;
+        }
+        hint.textContent =
+          "Certificate numbers: " + n.format + " \u2014 for example " + n.example + ".";
+        hint.className = "form-status is-info";
+      })
+      .catch(function () { /* not important enough to interrupt anything */ });
+  }
 
   /* ---------- Signed-in administrators only ---------- */
   function start() {

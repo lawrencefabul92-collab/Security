@@ -182,8 +182,10 @@ async function journey(label, env, port) {
   check("certificate issued via Redis", r.status === 200,
         `${r.status} ${JSON.stringify(r.data).slice(0, 120)}`);
   const id = r.data?.certificate?.certificate_id;
-  check("certificate number correct", id === "SEC-ACADEMY-2026-000001", id);
-  check("INCR used for the counter", commandLog.includes("INCR"));
+  check("certificate number carries year and random digits",
+        /^SEC-ACADEMY-2026-\d{6}$/.test(id || ""), id);
+  check("number claimed atomically (SET ... NX)",
+        commandLog.includes("SET"), commandLog.join(","));
 
   r = await call("/api/verify?id=" + id);
   check("public verification works", r.data?.found === true && r.data?.status === "VALID");

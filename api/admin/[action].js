@@ -25,6 +25,7 @@ import {
   requireAdmin
 } from "../../lib/auth.js";
 import { storageStatus, diagnose, StorageUnavailable } from "../../lib/store.js";
+import { describeNumbering } from "../../lib/numbering.js";
 import {
   ok,
   created,
@@ -145,7 +146,11 @@ async function setupStatus(req, res) {
     source: credentials ? (stored ? "database" : "environment") : null,
     storage: storageStatus(),
     /* Variable NAMES only. Nothing here reveals a host, URL or token. */
-    diagnostics: diagnose()
+    diagnostics: diagnose(),
+    /* Lets you confirm from a browser which numbering scheme the running
+       deployment is using, without signing in and without issuing
+       anything. */
+    numbering: describeNumbering()
   });
 }
 

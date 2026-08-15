@@ -20,8 +20,8 @@ import { requireAdmin } from "../../lib/auth.js";
 import {
   getJSON,
   setJSON,
+  setJSONIfAbsent,
   del,
-  incr,
   indexAdd,
   indexRemove,
   indexList,
@@ -30,6 +30,12 @@ import {
   StorageUnavailable
 } from "../../lib/store.js";
 import { courseById, isCertifiable } from "../../lib/courses.js";
+import {
+  CERT_ID_PATTERN as ID_PATTERN,
+  MAX_ATTEMPTS,
+  generateCertificateId,
+  exampleCertificateId
+} from "../../lib/numbering.js";
 import {
   ok,
   badRequest,
@@ -44,10 +50,9 @@ import {
   originOf
 } from "../../lib/http.js";
 
-export const CERT_ID_PATTERN = /^SEC-ACADEMY-\d{4}-\d{6}$/;
+export const CERT_ID_PATTERN = ID_PATTERN;
 const CERT_INDEX = "cert:index";
 const certKey = (id) => `cert:${id}`;
-const seqKey = (year) => `cert:seq:${year}`;
 
 export default async function handler(req, res) {
   /* Nothing below this line runs for an unauthenticated caller. */
@@ -59,7 +64,7 @@ export default async function handler(req, res) {
   try {
     switch (action) {
       case "create":
-        return await create(req, res);
+        return await create(req, res, session);
       case "list":
         return await list(req, res);
       case "find":
@@ -86,7 +91,7 @@ export default async function handler(req, res) {
 /* ---------------------------------------------------------
    Issue a certificate
    --------------------------------------------------------- */
-async function create(req, res) {
+async function create(req, res, session) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
   const body = await readBody(req);
@@ -138,42 +143,54 @@ async function create(req, res) {
     );
   }
 
-  /* Atomic. Two administrators pressing Generate at the same moment
-     receive different numbers; a number is never handed out twice,
-     even if the record write that follows fails. */
-  const sequence = await incr(seqKey(year));
-  const id = `SEC-ACADEMY-${year}-${String(sequence).padStart(6, "0")}`;
-
-  /* Belt and braces: refuse rather than overwrite, in the event a
-     counter is ever reset by hand. */
-  const clash = await getJSON(certKey(id));
-  if (clash) {
-    return serverError(
-      res,
-      new Error(`Sequence collision on ${id}`),
-      "Certificate numbering is out of step. No certificate was issued. Contact the site administrator."
-    );
-  }
-
   const origin = originOf(req);
   const now = new Date();
 
-  const record = {
-    certificate_id: id,
-    student_name: studentName,
-    course_id: courseId,
-    course_title: course.courseTitle,
-    course_level: course.level,
-    course_duration: course.duration,
-    completion_date: completionDate,
-    issue_date: now.toISOString().slice(0, 10),
-    issued_by: (await requireAdmin(req))?.email || null,
-    status: "VALID",
-    created_at: now.toISOString(),
-    verification_url: `${origin}/verify?id=${encodeURIComponent(id)}`
-  };
+  /* Claim a random number atomically.
 
-  await setJSON(certKey(id), record);
+     The record is written with "create only if absent". If the number is
+     already taken, the write does not happen, nothing is overwritten, and
+     another number is drawn. This is what makes random numbering safe:
+     there is no window between checking and writing for a second request
+     to slip into. */
+  let id = null;
+  let record = null;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    const candidate = generateCertificateId(year);
+
+    const draft = {
+      certificate_id: candidate,
+      student_name: studentName,
+      course_id: courseId,
+      course_title: course.courseTitle,
+      course_level: course.level,
+      course_duration: course.duration,
+      completion_date: completionDate,
+      issue_date: now.toISOString().slice(0, 10),
+      issued_by: session.email || null,
+      status: "VALID",
+      created_at: now.toISOString(),
+      verification_url: `${origin}/verify?id=${encodeURIComponent(candidate)}`
+    };
+
+    const claimed = await setJSONIfAbsent(certKey(candidate), draft);
+    if (claimed) {
+      id = candidate;
+      record = draft;
+      break;
+    }
+    /* Taken. Draw again. */
+  }
+
+  if (!record) {
+    return serverError(
+      res,
+      new Error(`Could not find a free certificate number after ${MAX_ATTEMPTS} attempts`),
+      "A certificate number could not be allocated. No certificate was issued. Please try again."
+    );
+  }
+
   await indexAdd(CERT_INDEX, id, now.getTime());
 
   return ok(res, { ok: true, certificate: record });
@@ -215,7 +232,7 @@ async function find(req, res) {
   if (!CERT_ID_PATTERN.test(id)) {
     return badRequest(
       res,
-      "Certificate IDs look like SEC-ACADEMY-2026-000001."
+      `Certificate IDs look like ${exampleCertificateId()}.`
     );
   }
 

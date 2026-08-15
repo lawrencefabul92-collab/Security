@@ -199,13 +199,26 @@ ok("Password comparison is constant time",
    read("lib/auth.js").includes("timingSafeEqual"));
 
 head("Certificate system");
-ok("Certificate ID format is SEC-ACADEMY-YYYY-NNNNNN",
-   certApi.includes("SEC-ACADEMY-${year}-${String(sequence).padStart(6"));
-ok("Numbering uses an atomic counter", certApi.includes("await incr(seqKey(year))"));
-ok("Collision is refused rather than overwritten",
-   certApi.includes("Sequence collision"));
-ok("Deleting never rewinds the counter",
-   certApi.includes("counter is deliberately left alone"));
+const numbering = read("lib/numbering.js");
+ok("Certificate ID is the completion year plus random digits",
+   numbering.includes("crypto.randomInt") &&
+   numbering.includes("${PREFIX}-${year}-${suffix}"));
+/* Strip comments before checking, otherwise the note explaining why
+   Math.random is unsuitable trips the very check that forbids it. */
+const numberingCode = numbering
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/^\s*\/\/.*$/gm, "");
+ok("Randomness is cryptographic, not Math.random",
+   numberingCode.includes("crypto.randomInt") &&
+   !numberingCode.includes("Math.random"));
+ok("Old sequential numbers still verify",
+   /\\d\{4,8\}/.test(numbering));
+ok("Numbers are claimed atomically, so a collision cannot duplicate one",
+   certApi.includes("setJSONIfAbsent(certKey(candidate)"));
+ok("A number already taken is redrawn, never overwritten",
+   certApi.includes("MAX_ATTEMPTS") &&
+   certApi.includes("could not be allocated"));
+
 ok("Course title is taken from the catalogue, not the request",
    certApi.includes("course.courseTitle") &&
    !/body\.courseTitle|body\.course_title/.test(certApi));

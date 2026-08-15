@@ -1,0 +1,102 @@
+================================================================
+SECURITY TRAINING ACADEMY — HOW TO RUN IT
+================================================================
+
+You need Node.js 20 or newer. Nothing else. There are no npm
+packages to install.
+
+
+----------------------------------------------------------------
+THE SHORT VERSION
+----------------------------------------------------------------
+
+Open a terminal in this folder and run:
+
+    npm run dev
+
+Then open:
+
+    http://localhost:3000
+
+That is the correct way to run the site.
+
+
+----------------------------------------------------------------
+WHY YOU NEED THE SERVER
+----------------------------------------------------------------
+
+You CAN open public/index.html straight from disk by
+double-clicking it, and the public pages will look correct: the
+styling, logo, fonts, navigation and course cards all work.
+
+But these parts CANNOT work from disk, because they need a
+server to talk to:
+
+    - Certificate verification        (/verify.html)
+    - Administrator sign in           (/admin-login.html)
+    - Administrator setup             (/admin-setup.html)
+    - Administrator dashboard         (/admin.html)
+    - Certificate generator           (/certificate-generator.html)
+    - The enrolment inquiry form
+
+Opened from disk, those pages show a plain message saying the
+service could not be reached. That is expected, not a fault.
+Start the server and they work.
+
+
+----------------------------------------------------------------
+ALL THE COMMANDS
+----------------------------------------------------------------
+
+    npm run dev        Start the site at http://localhost:3000
+    npm run preview    The same thing, different name
+    npm run build      Regenerate course data and check every
+                       asset path resolves. Fails loudly if a
+                       stylesheet, script or image is missing.
+    npm test           Run the full API test suite
+    npm run qa         Run the delivery checklist
+    npm run sync:courses   Rebuild the browser course list after
+                           editing lib/courses.js
+
+    npm run preview:certificate
+                       Write preview/certificate-preview.html so
+                       you can check the certificate design and
+                       print layout without deploying anything
+
+
+----------------------------------------------------------------
+IF PORT 3000 IS BUSY
+----------------------------------------------------------------
+
+    PORT=4000 npm run dev            (macOS / Linux)
+    set PORT=4000 && npm run dev     (Windows, Command Prompt)
+    $env:PORT=4000; npm run dev      (Windows, PowerShell)
+
+
+----------------------------------------------------------------
+NODE VERSION
+----------------------------------------------------------------
+
+The Node version is declared in ONE place only:
+
+    package.json  ->  "engines": { "node": "22.x" }
+
+Do not add a "runtime" key to vercel.json. That key is only for
+community runtimes written as package@1.2.3, and putting a value
+like "nodejs22.x" there fails the deploy with:
+
+    Function Runtimes must have a valid version,
+    for example `now-php@1.0.0`
+
+Vercel works out the Node runtime by itself. "npm run build"
+checks this and refuses to build if the key comes back.
+
+
+----------------------------------------------------------------
+DEPLOYING
+----------------------------------------------------------------
+
+See README.md, sections 2 to 5. In short: push to Git, import
+into Vercel, connect Upstash Redis under Storage, redeploy, then
+open /admin-setup.html and create your administrator account
+straight away.

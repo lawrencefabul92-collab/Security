@@ -1,0 +1,23 @@
+{
+  "name": "security-training-academy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Security Training Academy \u2014 professional security course site, administrator-only certificate generator and public certificate verification. Built for Vercel.",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/dev-server.mjs",
+    "start": "node scripts/dev-server.mjs",
+    "sync:courses": "node scripts/sync-courses.mjs",
+    "hash-password": "node scripts/hash-password.mjs",
+    "test": "node scripts/test-system.mjs",
+    "qa": "node scripts/final-qa.mjs",
+    "preview:certificate": "node scripts/preview-certificate.mjs",
+    "test:storage": "node scripts/test-storage.mjs"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrator Sign In | Security Training Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08152f">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/certificate.css">
+</head>
+<body>
+
+<main id="main">
+<section class="section">
+  <div class="wrap auth-shell">
+
+    <div class="brand-block">
+      <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+      <div class="nm">Security Training Academy</div>
+      <div class="sub">Administrator access</div>
+    </div>
+
+    <div class="panel">
+      <h2>Sign in</h2>
+      <p class="lede">This area is restricted to authorised administrators.</p>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" required autocomplete="username" maxlength="160">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required autocomplete="current-password" maxlength="128">
+        </div>
+        <button class="btn btn--navy btn--block" type="submit" id="login-btn">Sign in</button>
+        <div class="form-status" id="login-status" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="tools">
+        <h3>First time here?</h3>
+        <p id="setup-hint">Checking whether an administrator account exists&hellip;</p>
+        <a class="btn btn--ghost btn--sm" href="admin-setup.html" id="setup-link" hidden>Open administrator setup</a>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:1.6rem;font-size:.9rem">
+      <a href="index.html">Return to the public website</a>
+    </p>
+
+  </div>
+</section>
+</main>
+
+<script src="assets/js/admin-login.js"></script>
+</body>
+</html>

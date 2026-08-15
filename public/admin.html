@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrator Dashboard | Security Training Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08152f">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/certificate.css">
+</head>
+<body class="is-gated">
+
+<div class="gate" id="gate">
+  <div>
+    <img src="assets/img/logo-mark.png" alt="" width="510" height="576" aria-hidden="true">
+    <p id="gate-message">Checking your session&hellip;</p>
+  </div>
+</div>
+
+<header class="header" id="admin-header" hidden>
+  <div class="wrap header__bar">
+    <a class="brand" href="admin.html" aria-label="Security Training Academy — admin dashboard">
+      <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+    </a>
+    <div class="header__cta">
+      <span class="admin-who" id="admin-who"></span>
+      <a class="btn btn--gold btn--sm" href="certificate-generator.html">New certificate</a>
+      <button class="btn btn--ghost btn--sm" type="button" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+  <div class="tricolor tricolor--bar" aria-hidden="true"></div>
+</header>
+
+<main id="main" hidden>
+
+<section class="page-hero">
+  <div class="wrap">
+    <p class="crumbs">Administrator<span aria-hidden="true">/</span>Dashboard</p>
+    <h1>Dashboard</h1>
+    <p>Issued certificates and enrolment inquiries for this deployment.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+
+    <div class="form-status is-err" id="storage-warning" hidden></div>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="k" id="stat-total">&mdash;</div><div class="v">Certificates issued</div></div>
+      <div class="stat"><div class="k" id="stat-valid">&mdash;</div><div class="v">Valid</div></div>
+      <div class="stat"><div class="k" id="stat-revoked">&mdash;</div><div class="v">Revoked</div></div>
+      <div class="stat"><div class="k" id="stat-inquiries">&mdash;</div><div class="v">New inquiries</div></div>
+    </div>
+
+    <div class="admin-tabs" role="tablist">
+      <button class="admin-tab is-active" type="button" role="tab" data-tab="certificates" aria-selected="true">Certificates</button>
+      <button class="admin-tab" type="button" role="tab" data-tab="inquiries" aria-selected="false">Inquiries</button>
+    </div>
+
+    <!-- ===== Certificates ===== -->
+    <div id="tab-certificates">
+      <div class="panel" style="margin-bottom:1.6rem">
+        <h2>Find a certificate</h2>
+        <p class="lede">Enter a full certificate number to open its record.</p>
+        <form class="verify-form" id="find-form" novalidate>
+          <div class="field">
+            <label for="find-id">Certificate number</label>
+            <input id="find-id" type="text" placeholder="SEC-ACADEMY-2026-000001" autocomplete="off" spellcheck="false" maxlength="40">
+          </div>
+          <button class="btn btn--navy" type="submit">Find</button>
+        </form>
+        <div class="form-status" id="find-status" role="status" aria-live="polite"></div>
+        <div id="find-result"></div>
+      </div>
+
+      <h2 style="margin-bottom:1rem">Issued certificates</h2>
+      <div class="records" id="cert-list">Loading&hellip;</div>
+      <p style="margin-top:1.2rem" id="cert-more-wrap" hidden>
+        <button class="btn btn--ghost btn--sm" type="button" id="cert-more">Load more</button>
+      </p>
+      <div class="form-status" id="cert-status" role="status" aria-live="polite"></div>
+    </div>
+
+    <!-- ===== Inquiries ===== -->
+    <div id="tab-inquiries" hidden>
+      <h2 style="margin-bottom:1rem">Enrolment inquiries</h2>
+      <div class="records" id="inq-list">Loading&hellip;</div>
+      <div class="form-status" id="inq-status" role="status" aria-live="polite"></div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<script src="assets/js/courses.js"></script>
+<script src="assets/js/admin-dashboard.js"></script>
+</body>
+</html>

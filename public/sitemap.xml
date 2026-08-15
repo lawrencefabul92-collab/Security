@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Replace YOUR-DOMAIN.com with the deployment's real domain
+  before submitting this file to a search engine. Administrator
+  pages and the API are deliberately absent.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://YOUR-DOMAIN.com/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/courses</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/verify</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/course.html?id=security-management-fundamentals</loc><priority>0.8</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/course.html?id=security-operations-and-supervision</loc><priority>0.8</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/course.html?id=security-risk-management</loc><priority>0.8</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/course.html?id=security-investigation-and-reporting</loc><priority>0.8</priority></url>
+  <url><loc>https://YOUR-DOMAIN.com/course.html?id=emergency-response-and-crisis-management</loc><priority>0.8</priority></url>
+</urlset>

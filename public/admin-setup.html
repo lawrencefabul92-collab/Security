@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrator Setup | Security Training Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08152f">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/certificate.css">
+</head>
+<body>
+
+<main id="main">
+<section class="section">
+  <div class="wrap auth-shell">
+
+    <div class="brand-block">
+      <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+      <div class="nm">Security Training Academy</div>
+      <div class="sub">One-time administrator setup</div>
+    </div>
+
+    <div class="panel" id="setup-panel" hidden>
+      <h2>Create the administrator account</h2>
+      <p class="lede">This page works once. As soon as an account exists it closes permanently, and everyone is sent to the sign-in page instead.</p>
+
+      <div class="notice" style="margin-bottom:1.6rem">
+        <p style="margin-bottom:0">Choose a long password and store it in a password manager. The password is hashed with scrypt on the server and cannot be recovered or displayed — only replaced.</p>
+      </div>
+
+      <form id="setup-form" novalidate>
+        <div class="field">
+          <label for="email">Administrator email</label>
+          <input id="email" name="email" type="email" required autocomplete="username" maxlength="160">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required autocomplete="new-password" minlength="12" maxlength="128">
+          <p class="hint">At least 12 characters.</p>
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" required autocomplete="new-password" maxlength="128">
+        </div>
+        <button class="btn btn--gold btn--block" type="submit" id="setup-btn">Create administrator account</button>
+        <div class="form-status" id="setup-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="panel" id="closed-panel" hidden>
+      <h2>Setup is closed</h2>
+      <p class="lede" id="closed-reason">An administrator account already exists for this deployment.</p>
+      <a class="btn btn--navy btn--block" href="admin-login.html">Go to sign in</a>
+      <div class="tools">
+        <h3>Lost the password?</h3>
+        <p style="margin-bottom:0">There is no self-service reset, by design. The account record must be removed from the data store by whoever administers the deployment, after which this page reopens.</p>
+      </div>
+    </div>
+
+    <div class="panel" id="checking-panel">
+      <p style="margin:0;color:var(--muted)">Checking whether setup is still open&hellip;</p>
+    </div>
+
+    <p style="text-align:center;margin-top:1.6rem;font-size:.9rem">
+      <a href="index.html">Return to the public website</a>
+    </p>
+
+  </div>
+</section>
+</main>
+
+<script src="assets/js/admin-setup.js"></script>
+</body>
+</html>

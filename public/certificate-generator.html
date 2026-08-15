@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certificate Generator | Security Training Academy</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08152f">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/certificate.css">
+<link rel="stylesheet" href="assets/css/print.css" media="print">
+</head>
+
+<!-- The page renders nothing until the server confirms an admin
+     session. That check is a convenience, not the security boundary:
+     certificates can only be created by /api/certificates/create,
+     which verifies the session cookie again on every single call. -->
+<body class="is-gated">
+
+<div class="gate" id="gate">
+  <div>
+    <img src="assets/img/logo-mark.png" alt="" width="510" height="576" aria-hidden="true">
+    <p id="gate-message">Checking your session&hellip;</p>
+  </div>
+</div>
+
+<header class="header no-print" id="admin-header" hidden>
+  <div class="wrap header__bar">
+    <a class="brand" href="admin.html" aria-label="Security Training Academy — admin dashboard">
+      <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+    </a>
+    <div class="header__cta">
+      <span class="admin-who" id="admin-who"></span>
+      <a class="btn btn--ghost btn--sm btn--hide-sm" href="admin.html">Dashboard</a>
+      <button class="btn btn--ghost btn--sm" type="button" id="logout-btn">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" hidden>
+
+<section class="page-hero no-print">
+  <div class="wrap">
+    <p class="crumbs"><a href="admin.html">Administrator</a><span aria-hidden="true">/</span>Certificate generator</p>
+    <h1>Certificate generator</h1>
+    <p>Issue an official Certificate of Completion. Each certificate receives a unique certificate number and a QR code that opens the public verification page.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap gen-layout">
+
+    <div class="panel no-print">
+      <h2>Certificate details</h2>
+      <p class="lede">All three fields are required. The course determines the title printed on the certificate.</p>
+
+      <div class="form-status is-info" id="storage-warning" hidden></div>
+
+      <form id="cert-form" novalidate>
+        <div class="field" id="f-student">
+          <label for="student">Student full name</label>
+          <input id="student" name="student" type="text" required maxlength="80"
+                 autocomplete="off" spellcheck="false" placeholder="Juan Dela Cruz">
+          <p class="hint">Printed on the certificate exactly as typed.</p>
+          <p class="err" id="e-student"></p>
+        </div>
+
+        <div class="field" id="f-course">
+          <label for="cert-course">Course</label>
+          <select id="cert-course" name="course" required>
+            <option value="">Choose a course</option>
+            <!-- Options are rendered from the course catalogue -->
+          </select>
+          <p class="err" id="e-course"></p>
+        </div>
+
+        <div class="field" id="f-completion">
+          <label for="completion">Completion date</label>
+          <input id="completion" name="completion" type="date" required>
+          <p class="err" id="e-completion"></p>
+        </div>
+
+        <button class="btn btn--gold btn--block" type="submit" id="generate-btn">Generate certificate</button>
+        <div class="form-status" id="cert-status" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="tools">
+        <h3>Recently issued</h3>
+        <p>Select a certificate to reopen it for reprinting.</p>
+        <div id="recent-list" class="records">Loading&hellip;</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="result-bar no-print" id="result-bar">
+        <div>
+          <span class="lb">Verification link encoded in the QR code</span>
+          <span class="lk" id="verify-link"></span>
+        </div>
+        <div class="result-bar__actions">
+          <button class="btn btn--ghost btn--sm" type="button" id="copy-btn">Copy link</button>
+          <a class="btn btn--ghost btn--sm" id="open-verify" href="verify.html" target="_blank" rel="noopener">Open verification</a>
+          <button class="btn btn--navy btn--sm" type="button" id="print-btn">Print / Save as PDF</button>
+        </div>
+      </div>
+
+      <div class="empty-state no-print" id="empty-state">
+        <div>
+          <img src="assets/img/logo-mark.png" alt="" width="510" height="576">
+          <p>The certificate will appear here once you generate it, at true A4 landscape proportions.</p>
+        </div>
+      </div>
+
+      <!-- A4 landscape certificate at true print size, scaled to fit. -->
+      <div class="cert-stage" id="cert-stage" hidden>
+        <div class="cert-scaler" id="cert-scaler">
+          <div class="certificate" id="certificate">
+
+            <div class="certificate__edge" aria-hidden="true"></div>
+            <div class="certificate__guilloche" aria-hidden="true"></div>
+            <img class="certificate__watermark" src="assets/img/logo-mark.png" alt="" aria-hidden="true">
+            <div class="certificate__rule" aria-hidden="true"></div>
+            <span class="certificate__corner tl" aria-hidden="true"></span>
+            <span class="certificate__corner tr" aria-hidden="true"></span>
+            <span class="certificate__corner bl" aria-hidden="true"></span>
+            <span class="certificate__corner br" aria-hidden="true"></span>
+            <div class="certificate__microprint" id="c-microprint" aria-hidden="true"></div>
+
+            <div class="certificate__inner">
+
+              <img class="certificate__logo" src="assets/img/logo.png"
+                   alt="Philippine Security and Safety Professional" width="1200" height="452">
+              <div class="certificate__flagrule" aria-hidden="true"></div>
+
+              <div class="certificate__title">
+                <i aria-hidden="true"></i>
+                <span>Certificate of Completion</span>
+                <i aria-hidden="true"></i>
+              </div>
+
+              <p class="certificate__lead">This is to certify that</p>
+              <p class="certificate__name" id="c-name">Student Name</p>
+              <p class="certificate__lead">has successfully completed the course</p>
+
+              <div class="certificate__course-band">
+                <p class="certificate__course" id="c-course">Course Title</p>
+              </div>
+
+              <p class="certificate__statement">
+                Awarded in recognition of the successful completion of all required modules and
+                assessments for this course of professional security training. This document may be
+                verified at any time using the certificate number and QR code shown below.
+              </p>
+
+              <div class="certificate__foot">
+
+                <div class="certificate__issue">
+                  <div>
+                    <div class="certificate__lb">Completion date</div>
+                    <div class="certificate__vl" id="c-date">&mdash;</div>
+                  </div>
+                  <div>
+                    <div class="certificate__lb">Certificate number</div>
+                    <div class="id" id="c-id">SEC-ACADEMY-0000-000000</div>
+                  </div>
+                  <div>
+                    <div class="certificate__lb">Issued by</div>
+                    <div class="org">Philippine Security and Safety Professional<br>Security Training Academy</div>
+                  </div>
+                </div>
+
+                <div class="certificate__sign">
+                  <div class="certificate__sign-placeholder" id="c-sign-placeholder">
+                    <span id="c-sign-placeholder-text">[ Authorized Signature ]</span>
+                  </div>
+                  <img class="certificate__sign-image" id="c-sign-image" src="" alt="" hidden>
+                  <div class="line">
+                    <div class="nm" id="c-sign-name">Mr. Darryl C. Bautista</div>
+                    <div class="cr" id="c-sign-credentials">CSP, CST, SO4, SM</div>
+                    <div class="rl" id="c-sign-role">Authorized Signatory</div>
+                  </div>
+                </div>
+
+                <div class="certificate__qr">
+                  <div class="certificate__qr-box" id="c-qr"></div>
+                  <div class="scan">Scan to verify</div>
+                  <div class="host" id="c-host"></div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<script src="assets/vendor/qrcode.min.js"></script>
+<script src="assets/js/courses.js"></script>
+<script src="assets/js/signature-config.js"></script>
+<script src="assets/js/certificate-render.js"></script>
+<script src="assets/js/certificate-generator.js"></script>
+</body>
+</html>

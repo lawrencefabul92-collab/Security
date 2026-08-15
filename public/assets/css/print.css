@@ -1,0 +1,68 @@
+/* =========================================================
+   PRINT — A4 landscape, certificate only.
+
+   Everything that is not the certificate is removed, the
+   scaling transform used on screen is undone, and the sheet is
+   pinned to exactly 297mm x 210mm with a zero page margin so
+   nothing is clipped and no browser header or footer band
+   pushes the artwork off the page.
+
+   Attached with media="print", so it costs a screen reader or
+   a phone nothing.
+   ========================================================= */
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+}
+
+/* The generator page starts gated. Printing must not be able to
+   reveal the shell, and must not hide the certificate either. */
+body.is-gated .cert-stage { display: block !important; }
+
+.header, .page-hero, .footer, .panel, .tools, .gate,
+.result-bar, .empty-state, .skip-link, .admin-tabs,
+.stat-grid, .records, .no-print {
+  display: none !important;
+}
+
+.section, .wrap, .gen-layout, .cert-stage {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+  overflow: visible !important;
+}
+
+.cert-scaler {
+  transform: none !important;
+  width: 297mm !important;
+  height: 210mm !important;
+  margin: 0 !important;
+}
+
+.certificate {
+  box-shadow: none !important;
+  border: 0 !important;
+  width: 297mm !important;
+  height: 210mm !important;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Navy bands, gold rules and the watermark are the document, not
+   decoration, so background printing is forced on. */
+.certificate, .certificate * {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.reveal { opacity: 1 !important; transform: none !important; }

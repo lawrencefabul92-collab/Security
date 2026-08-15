@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify a Certificate | Security Training Academy</title>
+<meta name="description" content="Check whether a Security Training Academy certificate is genuine. Enter the certificate number or scan the QR code printed on the certificate to see the recipient, the course and the completion date.">
+<meta name="theme-color" content="#08152f">
+<link rel="canonical" href="https://YOUR-DOMAIN.com/verify">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Security Training Academy">
+<meta property="og:title" content="Verify a Certificate | Security Training Academy">
+<meta property="og:description" content="Confirm a Security Training Academy Certificate of Completion using its certificate number or the QR code printed on it.">
+<meta property="og:url" content="https://YOUR-DOMAIN.com/verify">
+<meta property="og:image" content="https://YOUR-DOMAIN.com/assets/img/og-image.jpg">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/certificate.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="header">
+  <div class="wrap header__bar">
+    <a class="brand" href="index.html" aria-label="Security Training Academy — home">
+      <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="courses.html">Courses</a>
+      <a href="index.html#how">Enrolment</a>
+      <a href="index.html#about">About</a>
+      <a href="verify.html" class="is-active">Verify</a>
+    </nav>
+    <div class="header__cta">
+      <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="tricolor tricolor--bar" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+<section class="page-hero">
+  <div class="wrap">
+    <p class="crumbs"><a href="index.html">Home</a><span aria-hidden="true">/</span>Certificate verification</p>
+    <h1>Verify a certificate</h1>
+    <p>Enter the certificate number printed on a Security Training Academy Certificate of Completion, or scan its QR code, to confirm the recipient, the course and the completion date.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap verify-shell">
+
+    <div class="panel">
+      <h2>Certificate number</h2>
+      <p class="lede">Certificate numbers look like SEC-ACADEMY-2026-000001 and are printed in the lower left of the certificate.</p>
+
+      <form class="verify-form" id="verify-form" novalidate>
+        <div class="field">
+          <label for="cert-id">Enter certificate number</label>
+          <input id="cert-id" name="cert-id" type="text" inputmode="text" autocomplete="off"
+                 spellcheck="false" placeholder="SEC-ACADEMY-2026-000001" required maxlength="40">
+        </div>
+        <button class="btn btn--navy" type="submit" id="verify-btn">Verify certificate</button>
+      </form>
+    </div>
+
+    <div class="verdict" id="verdict" role="status" aria-live="polite">
+      <div class="verdict__head">
+        <span class="mark" id="verdict-mark" aria-hidden="true">&check;</span>
+        <div>
+          <h2 id="verdict-title">Certificate verified</h2>
+          <p id="verdict-sub"></p>
+        </div>
+      </div>
+      <div class="verdict__body">
+        <div class="verdict__brand">
+          <img src="assets/img/logo.png" alt="Philippine Security and Safety Professional" width="1200" height="452">
+        </div>
+        <dl id="verdict-details"></dl>
+        <div class="verdict__note" id="verdict-note"></div>
+      </div>
+    </div>
+
+    <div class="help-note">
+      <p><strong>Scanning a certificate?</strong> The QR code opens this page with the result already loaded — there is nothing to type.</p>
+      <p><strong>What this page shows.</strong> A certificate is only displayed when a specific certificate number is supplied. The academy does not publish a list of issued certificates, and this page cannot be used to browse them.</p>
+      <p style="margin-bottom:0"><strong>Not what you expected?</strong> If any detail shown here does not match the printed document in front of you, do not rely on that document.</p>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <img src="assets/img/logo-mark.png" alt="" width="510" height="576" aria-hidden="true">
+        <div class="nm">Security Training Academy</div>
+        <div class="sub">Philippine Security and Safety Professional</div>
+        <p>Professional security training for working practitioners, with certificates that can be verified publicly at any time.</p>
+      </div>
+      <div>
+        <h4>Courses</h4>
+        <ul id="footer-courses"></ul>
+      </div>
+      <div>
+        <h4>Academy</h4>
+        <ul>
+          <li><a href="index.html#about">About the academy</a></li>
+          <li><a href="index.html#how">How enrolment works</a></li>
+          <li><a href="index.html#enrol">Enrolment inquiry</a></li>
+          <li><a href="verify.html">Verify a certificate</a></li>
+          <li><a href="index.html#faq">Common questions</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="tricolor tricolor--bar" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="footer__base">
+      <span>&copy; <span data-year>2026</span> Security Training Academy &middot; Philippine Security and Safety Professional</span>
+      <span>Certificates of Completion are not government licences or accreditations.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/courses.js"></script>
+<script src="assets/js/site-chrome.js"></script>
+<script src="assets/js/verify.js"></script>
+</body>
+</html>

@@ -1,0 +1,792 @@
+/* =========================================================
+   CERTIFICATE · GENERATOR · VERIFICATION
+   Depends on styles.css for tokens.
+
+   The certificate is laid out in millimetres at true A4
+   landscape size (297mm x 210mm) and scaled down for the
+   screen with a transform. What you see on screen is
+   therefore the same geometry that comes out of the printer,
+   rather than a screen design that has to be re-tuned for
+   print afterwards.
+   ========================================================= */
+
+/* ---------- Admin gate ---------- */
+body.is-gated { background: var(--navy-950); }
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: var(--navy-950);
+  padding: 2rem;
+  text-align: center;
+}
+.gate img { height: 92px; width: auto; margin: 0 auto 1.6rem; }
+.gate p {
+  font-family: var(--mono);
+  font-size: .82rem;
+  letter-spacing: .1em;
+  color: rgba(255, 255, 255, .66);
+  max-width: 46ch;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+.gate code {
+  background: rgba(255, 255, 255, .1);
+  padding: .1rem .35rem;
+  color: var(--gold-light);
+}
+
+/* ---------- Generator layout ---------- */
+.gen-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 390px) minmax(0, 1fr);
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+  align-items: start;
+}
+/* Grid children default to min-width:auto, which would otherwise let
+   the full-size A4 sheet push the whole page wider than the screen. */
+.gen-layout > * { min-width: 0; }
+@media (max-width: 1000px) {
+  .gen-layout { grid-template-columns: 1fr; }
+}
+
+.result-bar {
+  display: none;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: .95rem 1.1rem;
+  margin-bottom: 1.2rem;
+}
+.result-bar.is-shown { display: flex; }
+.result-bar .lb {
+  display: block;
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.result-bar .lk {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--blue);
+  word-break: break-all;
+}
+.result-bar__actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 320px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--mist);
+  padding: 2rem;
+  color: var(--muted);
+}
+.empty-state img { height: 74px; width: auto; opacity: .28; margin: 0 auto 1.1rem; }
+.empty-state p { max-width: 40ch; font-size: .93rem; margin: 0; }
+
+/* =========================================================
+   THE CERTIFICATE — A4 landscape, 297mm x 210mm
+   ========================================================= */
+.cert-stage { position: relative; width: 100%; overflow: hidden; }
+
+.cert-scaler {
+  transform-origin: top left;
+  width: 297mm;
+  height: 210mm;
+}
+
+.certificate {
+  position: relative;
+  width: 297mm;
+  height: 210mm;
+  background: var(--white);
+  color: var(--navy-900);
+  overflow: hidden;
+  font-family: var(--body);
+  box-shadow: var(--shadow-lg);
+}
+
+/* --- Frame: navy band, gold rule, gold hairline --- */
+.certificate__edge {
+  position: absolute;
+  inset: 0;
+  border: 7mm solid var(--navy-900);
+  pointer-events: none;
+}
+.certificate__rule {
+  position: absolute;
+  inset: 9mm;
+  border: 0.6mm solid var(--gold);
+  pointer-events: none;
+}
+.certificate__rule::after {
+  content: "";
+  position: absolute;
+  inset: 1.6mm;
+  border: 0.22mm solid var(--gold-deep);
+  opacity: .6;
+}
+
+/* --- Engraved hatch inside the frame --- */
+.certificate__guilloche {
+  position: absolute;
+  inset: 11mm;
+  background-image:
+    repeating-linear-gradient(54deg, rgba(229, 169, 18, .085) 0 0.28mm, transparent 0.28mm 2.4mm),
+    repeating-linear-gradient(-54deg, rgba(18, 41, 90, .05) 0 0.28mm, transparent 0.28mm 2.4mm);
+  pointer-events: none;
+}
+
+/* --- Shield watermark, centred, very faint --- */
+.certificate__watermark {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -54%);
+  width: 104mm;
+  opacity: .035;
+  pointer-events: none;
+}
+
+/* --- Corner chevrons, shield-derived --- */
+.certificate__corner {
+  position: absolute;
+  width: 13mm; height: 13mm;
+  pointer-events: none;
+}
+.certificate__corner::before,
+.certificate__corner::after {
+  content: "";
+  position: absolute;
+  background: var(--gold);
+}
+.certificate__corner::before { width: 100%; height: 0.7mm; }
+.certificate__corner::after { width: 0.7mm; height: 100%; }
+
+.certificate__corner.tl { top: 12.6mm; left: 12.6mm; }
+.certificate__corner.tl::before { top: 0; left: 0; }
+.certificate__corner.tl::after { top: 0; left: 0; }
+
+.certificate__corner.tr { top: 12.6mm; right: 12.6mm; }
+.certificate__corner.tr::before { top: 0; right: 0; }
+.certificate__corner.tr::after { top: 0; right: 0; }
+
+.certificate__corner.bl { bottom: 12.6mm; left: 12.6mm; }
+.certificate__corner.bl::before { bottom: 0; left: 0; }
+.certificate__corner.bl::after { bottom: 0; left: 0; }
+
+.certificate__corner.br { bottom: 12.6mm; right: 12.6mm; }
+.certificate__corner.br::before { bottom: 0; right: 0; }
+.certificate__corner.br::after { bottom: 0; right: 0; }
+
+/* --- Microprint band: a security-document detail that also tells a
+       holder where to check the document. --- */
+.certificate__microprint {
+  position: absolute;
+  left: 28mm; right: 28mm;
+  bottom: 10.1mm;
+  height: 2.2mm;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 1.45mm;
+  letter-spacing: .25mm;
+  line-height: 2.2mm;
+  color: var(--navy);
+  opacity: .3;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* --- Content --- */
+.certificate__inner {
+  position: relative;
+  height: 100%;
+  padding: 15mm 24mm 14mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.certificate__logo {
+  height: 26mm;
+  width: auto;
+  margin: 0 auto;
+}
+
+.certificate__flagrule {
+  width: 46mm;
+  height: 1.1mm;
+  margin: 2.6mm auto 0;
+  background: linear-gradient(90deg,
+    var(--navy) 0 22%,
+    var(--blue) 22% 44%,
+    var(--gold) 44% 56%,
+    var(--red) 56% 78%,
+    var(--navy) 78% 100%);
+}
+
+.certificate__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4mm;
+  width: 100%;
+  margin: 6mm 0 5mm;
+}
+.certificate__title span {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 8mm;
+  letter-spacing: 1.9mm;
+  text-transform: uppercase;
+  color: var(--navy-900);
+  white-space: nowrap;
+  text-indent: 1.9mm;
+}
+.certificate__title i {
+  flex: 1;
+  height: 0.4mm;
+  background: linear-gradient(90deg, transparent, var(--gold) 40%, var(--gold));
+  max-width: 34mm;
+}
+.certificate__title i:last-child {
+  background: linear-gradient(270deg, transparent, var(--gold) 40%, var(--gold));
+}
+
+.certificate__lead {
+  font-family: var(--mono);
+  font-size: 2.9mm;
+  letter-spacing: .8mm;
+  text-transform: uppercase;
+  color: #5a6683;
+  margin: 0;
+}
+
+.certificate__name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 13mm;
+  line-height: 1.14;
+  color: var(--navy-900);
+  margin: 4mm auto 3mm;
+  padding: 0 6mm 3.2mm;
+  max-width: 100%;
+  word-break: break-word;
+  position: relative;
+}
+.certificate__name::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 0;
+  transform: translateX(-50%);
+  width: 132mm;
+  max-width: 100%;
+  height: 0.5mm;
+  background: linear-gradient(90deg, transparent, var(--gold) 18%, var(--gold) 82%, transparent);
+}
+/* Long names step down rather than wrapping into the course band. */
+.certificate__name.is-long { font-size: 10.5mm; }
+.certificate__name.is-very-long { font-size: 8.6mm; }
+
+.certificate__course-band {
+  width: 100%;
+  margin: 4.6mm 0 0;
+  background: var(--navy-900);
+  border-top: 0.6mm solid var(--gold);
+  border-bottom: 0.6mm solid var(--gold);
+  padding: 3.4mm 6mm;
+}
+.certificate__course {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 6.4mm;
+  line-height: 1.2;
+  letter-spacing: .9mm;
+  text-transform: uppercase;
+  color: var(--white);
+  margin: 0;
+  text-indent: .9mm;
+}
+.certificate__course.is-long { font-size: 5.2mm; }
+
+.certificate__statement {
+  font-size: 3.2mm;
+  line-height: 1.6;
+  color: #5a6683;
+  max-width: 148mm;
+  margin: 6.5mm auto 0;
+}
+
+/* --- Footer: issue details · signature · verification --- */
+.certificate__foot {
+  margin-top: auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr .8fr;
+  gap: 8mm;
+  align-items: end;
+  text-align: left;
+}
+
+.certificate__lb {
+  font-family: var(--mono);
+  font-size: 2.3mm;
+  letter-spacing: .6mm;
+  text-transform: uppercase;
+  color: #6a748c;
+}
+.certificate__vl {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 4.4mm;
+  color: var(--navy-900);
+  margin-top: .7mm;
+}
+
+.certificate__issue > * + * { margin-top: 3.4mm; }
+.certificate__issue .id {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 3.4mm;
+  letter-spacing: .3mm;
+  color: var(--navy-900);
+  margin-top: .7mm;
+}
+.certificate__issue .org {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 3.1mm;
+  line-height: 1.35;
+  color: var(--navy);
+  margin-top: .7mm;
+  max-width: 62mm;
+}
+
+/* --- Signature area --- */
+.certificate__sign { text-align: center; }
+
+/* Shown until a real signature image is configured. No handwritten
+   signature is ever drawn or generated by this system. */
+.certificate__sign-placeholder {
+  height: 26mm;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1.5mm;
+}
+.certificate__sign-placeholder span {
+  font-family: var(--mono);
+  font-size: 2.4mm;
+  letter-spacing: .55mm;
+  text-transform: uppercase;
+  color: #97a0b4;
+}
+
+/* Bounded on both axes rather than fixed on one, so the signature is as
+   large as the space allows whatever its proportions. A compact scrawl is
+   limited by height; a long sweeping one is limited by width. Either way it
+   never grows into the statement above or past the signature line below.
+   The reserved block is the same height as the placeholder, so swapping a
+   signature in or out does not shift the rest of the certificate. */
+.certificate__sign-image {
+  display: block;
+  max-height: 26mm;
+  max-width: 74mm;
+  width: auto;
+  height: auto;
+  margin: 0 auto -0.5mm;
+  object-fit: contain;
+}
+
+.certificate__sign .line {
+  border-top: 0.45mm solid var(--navy-900);
+  padding-top: 1.8mm;
+}
+.certificate__sign .nm {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 4.6mm;
+  color: var(--navy-900);
+  white-space: nowrap;
+}
+.certificate__sign .cr {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 2.7mm;
+  letter-spacing: .5mm;
+  color: var(--navy);
+  margin-top: .9mm;
+}
+.certificate__sign .rl {
+  font-family: var(--mono);
+  font-size: 2.3mm;
+  letter-spacing: .6mm;
+  text-transform: uppercase;
+  color: #6a748c;
+  margin-top: .7mm;
+}
+
+/* --- QR verification --- */
+.certificate__qr { text-align: center; justify-self: end; }
+.certificate__qr-box {
+  width: 29mm;
+  height: 29mm;
+  margin: 0 auto 1.5mm;
+  padding: 1.5mm;             /* quiet zone */
+  background: #ffffff;
+  border: 0.45mm solid var(--gold);
+}
+.certificate__qr-box svg { width: 100%; height: 100%; display: block; }
+.certificate__qr-box svg rect:first-child { fill: #ffffff; }
+.certificate__qr-box svg path { fill: var(--navy-900); }
+.certificate__qr .scan {
+  font-family: var(--mono);
+  font-size: 2.2mm;
+  letter-spacing: .5mm;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.certificate__qr .host {
+  font-family: var(--mono);
+  font-size: 1.9mm;
+  letter-spacing: .2mm;
+  color: #6a748c;
+  margin-top: .6mm;
+  max-width: 44mm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-inline: auto;
+}
+
+/* A revoked certificate reopened in the generator is stamped, so a
+   reprint can never be mistaken for a live document. */
+.certificate.is-revoked::after {
+  content: "REVOKED";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-22deg);
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 46mm;
+  letter-spacing: 4mm;
+  color: rgba(196, 18, 48, .18);
+  border: 2mm solid rgba(196, 18, 48, .18);
+  padding: 3mm 8mm;
+  pointer-events: none;
+}
+
+/* =========================================================
+   VERIFICATION PAGE
+   ========================================================= */
+.verify-shell { max-width: 760px; margin-inline: auto; }
+
+.verify-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .7rem;
+  align-items: end;
+}
+.verify-form .field { margin-bottom: 0; }
+.verify-form input {
+  font-family: var(--mono);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+@media (max-width: 560px) {
+  .verify-form { grid-template-columns: 1fr; }
+}
+
+.verdict {
+  display: none;
+  margin-top: 1.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.verdict.is-shown { display: block; }
+
+.verdict__head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.3rem 1.5rem;
+  color: var(--white);
+  background: var(--navy-900);
+}
+.verdict.is-valid .verdict__head { background: #14603a; }
+.verdict.is-revoked .verdict__head { background: var(--gold-deep); }
+.verdict.is-invalid .verdict__head { background: var(--red-deep); }
+
+.verdict__head .mark {
+  width: 46px; height: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, .55);
+  border-radius: 50%;
+}
+.verdict__head h2 { color: var(--white); font-size: 1.5rem; margin: 0; }
+.verdict__head p {
+  margin: .2rem 0 0;
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .8);
+}
+
+.verdict__body { padding: 1.5rem; }
+.verdict__brand {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1.3rem;
+  margin-bottom: 1.3rem;
+  border-bottom: 1px solid var(--line);
+}
+.verdict__brand img { height: 54px; width: auto; }
+
+.verdict dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(150px, auto) 1fr;
+  gap: .1rem 1.2rem;
+}
+.verdict dt {
+  font-family: var(--mono);
+  font-size: .66rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--mist-200);
+}
+.verdict dd {
+  margin: 0;
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--mist-200);
+  font-size: 1.02rem;
+  color: var(--navy-900);
+  font-weight: 500;
+  word-break: break-word;
+}
+.verdict dd.mono { font-family: var(--mono); font-size: .92rem; letter-spacing: .03em; }
+@media (max-width: 560px) {
+  .verdict dl { grid-template-columns: 1fr; }
+  .verdict dt { padding-bottom: 0; border-bottom: 0; }
+  .verdict dd { padding-top: .15rem; }
+}
+
+.status-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  padding: .25rem .6rem;
+  background: #e6f3ec;
+  color: #14603a;
+  border: 1px solid #a9d3bd;
+}
+.status-pill--warn { background: #fdf3e0; color: #8a5f06; border-color: #e6cd92; }
+.status-pill--bad { background: #fdeff1; color: var(--red-deep); border-color: #f0bcc5; }
+
+.verdict__note {
+  margin-top: 1.3rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--line);
+  font-size: .92rem;
+  color: var(--muted);
+}
+.verdict__note p:last-child { margin-bottom: 0; }
+
+.help-note {
+  margin-top: 1.6rem;
+  font-size: .9rem;
+  color: var(--muted);
+  border-left: 3px solid var(--line-strong);
+  padding-left: 1rem;
+}
+.help-note strong { color: var(--navy-900); }
+
+/* =========================================================
+   ADMIN DASHBOARD
+   ========================================================= */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 1.8rem;
+}
+.stat { background: var(--white); padding: 1.2rem 1.3rem; }
+.stat .k {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 2.1rem;
+  line-height: 1.1;
+  color: var(--navy-900);
+}
+.stat .v {
+  font-family: var(--mono);
+  font-size: .64rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: .2rem;
+}
+
+.records { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.record {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: .8rem 1rem;
+  align-items: center;
+  padding: .9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+.record:last-child { border-bottom: 0; }
+.record:nth-child(even) { background: var(--paper); }
+
+.record__open {
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  min-width: 0;
+}
+.record__id {
+  display: block;
+  font-family: var(--mono);
+  font-size: .78rem;
+  color: var(--blue);
+  letter-spacing: .02em;
+}
+.record__nm {
+  display: block;
+  font-weight: 600;
+  color: var(--navy-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record__sub {
+  display: block;
+  font-size: .82rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record__open:hover .record__nm { color: var(--blue); }
+
+.record__st {
+  font-family: var(--mono);
+  font-size: .62rem;
+  letter-spacing: .12em;
+  padding: .22rem .55rem;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.record__st.ok { color: #14603a; border-color: #a9d3bd; background: #e6f3ec; }
+.record__st.no { color: #8a5f06; border-color: #e6cd92; background: #fdf3e0; }
+.record__st.new { color: var(--blue); border-color: #b7cef0; background: #eaf1fc; }
+
+.record__actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+.record__act {
+  font-family: var(--mono);
+  font-size: .64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .35rem .6rem;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  min-height: 32px;
+}
+.record__act:hover { border-color: var(--navy-900); color: var(--navy-900); }
+.record__act--danger:hover { border-color: var(--red); color: var(--red); }
+
+@media (max-width: 640px) {
+  .record { grid-template-columns: minmax(0, 1fr) auto; }
+  .record__actions { grid-column: 1 / -1; }
+}
+
+.tools {
+  margin-top: 1.6rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.3rem;
+}
+.tools h3 {
+  font-family: var(--mono);
+  font-size: .66rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .3rem;
+}
+.tools p { font-size: .84rem; color: var(--muted); margin-bottom: .9rem; }
+
+.admin-tabs {
+  display: flex;
+  gap: .4rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1.6rem;
+  flex-wrap: wrap;
+}
+.admin-tab {
+  font-family: var(--head);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: .7rem 1rem;
+  cursor: pointer;
+  color: var(--muted);
+}
+.admin-tab.is-active { color: var(--navy-900); border-bottom-color: var(--gold); }
+
+.auth-shell { max-width: 460px; margin-inline: auto; }
+.auth-shell .brand-block { text-align: center; margin-bottom: 1.8rem; }
+.auth-shell .brand-block img { height: 84px; width: auto; margin: 0 auto 1rem; }
+.auth-shell .brand-block .nm {
+  font-family: var(--head);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--navy-900);
+}
+.auth-shell .brand-block .sub {
+  font-family: var(--mono);
+  font-size: .64rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-top: .3rem;
+}
